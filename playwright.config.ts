@@ -1,20 +1,18 @@
-import { defineConfig } from "@playwright/test";
+import { defineConfig } from '@playwright/test';
+import { testConfig } from './testConfig';
 
 export default defineConfig({
-  testDir: "./tests",
+  testDir: './tests',
   timeout: 30 * 1000,
   retries: 0,
   use: {
-    baseURL: "https://qauto.forstudy.space/",
+    baseURL: testConfig.baseUrl,
+    httpCredentials: testConfig.httpCredentials,
     headless: true,
-    screenshot: "only-on-failure",
-    video: "retain-on-failure",
-    httpCredentials: {
-      username: "guest",
-      password: "welcome2qauto",
-    },
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
   },
-  reporter: [["list"], ["html"]],
-  outputDir: "test-results/",
-  testMatch: "**/*.spec.ts",
+  reporter: [['list'], ['html']],
+  outputDir: 'test-results/',
+  testMatch: '**/*.spec.ts',
 });
