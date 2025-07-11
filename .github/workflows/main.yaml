@@ -30,7 +30,7 @@ jobs:
             -e TEST_USER2_LOGIN=testuser@example.com \
             -e TEST_USER2_PASSWORD=typeTest1234 \
             -v ${{ github.workspace }}/playwright-report:/app/playwright-report \
-            my-playwright npx playwright test tests/apiCars.spec.ts
+            my-playwright npx playwright test tests/smoke.spec.ts
 
       - name: Upload Playwright HTML report
         uses: actions/upload-artifact@v4
