@@ -1,35 +1,37 @@
-name: Playwright Docker CI
-
+name: playwright-docker-smoke
 on:
   push:
-    branches: [ "main" ]
+    branches: [main]
   pull_request:
-    branches: [ "main" ]
+    branches: [main]
 
 jobs:
-  playwright-docker:
+  test:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Copy .env
-      run: cp .env.example .env
+      - name: Copy .env if exists
+        run: |
+          if [ -f .env ]; then
+            cp .env .env.ci
+          fi
 
-    - name: Build Docker image
-      run: docker build -t my-playwright .
+      - name: Build Docker image
+        run: docker build -t my-playwright .
 
-    - name: Run Playwright tests for apiCars.spec.ts
-      run: |
-        docker run --rm \
-          --env-file .env \
-          -v ${{ github.workspace }}/test-results:/app/test-results \
-          my-playwright \
-          npx playwright test tests/example.spec.ts
+      - name: Run Playwright smoke test in Docker
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}/test-results:/app/test-results \
+            -e PLAYWRIGHT_HTML_REPORT=/app/test-results/report \
+            my-playwright \
+            npx playwright test tests/smoke.spec.ts
 
-    - name: Upload Playwright HTML report
-      uses: actions/upload-artifact@v4
-      with:
-        name: playwright-report
-        path: test-results/
+      - name: Upload Playwright HTML report
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: test-results/
