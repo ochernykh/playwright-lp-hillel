@@ -1,4 +1,4 @@
-name: Playwright Tests in Docker (apiCars only)
+name: Playwright Tests with Deploy to GitHub Pages
 
 on:
   push:
@@ -9,11 +9,9 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    environment: testing 
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -21,7 +19,7 @@ jobs:
       - name: Build Docker image
         run: docker build -t my-playwright .
 
-      - name: Run ONLY apiCars tests inside Docker
+      - name: Run Playwright tests inside Docker
         run: |
           docker run --rm \
             -e BASE_URL=https://qauto.forstudy.space \
@@ -30,7 +28,6 @@ jobs:
             -e TEST_USER2_LOGIN=testuser@example.com \
             -e TEST_USER2_PASSWORD=typeTest1234 \
             -v ${{ github.workspace }}/playwright-report:/app/playwright-report \
-            -v ${{ github.workspace }}/test-results:/app/test-results \
             my-playwright \
             npx playwright test tests/apiCars.spec.ts
 
@@ -39,3 +36,32 @@ jobs:
         with:
           name: playwright-report
           path: playwright-report/
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download Playwright report artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: playwright-report
+          path: out
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact to Pages
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: out
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
